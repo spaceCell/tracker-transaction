@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { margin: 5px; padding: 10px; }
+        #transactions { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<h2>Добавить транзакцию</h2>
+<input type="text" id="token" placeholder="Введите токен">
+<input type="number" id="amount" placeholder="Введите сумму">
+<button onclick="addTransaction()">Добавить</button>
+
+<h2>Список транзакций</h2>
+<button onclick="getAllTransactions()">Показать все</button>
+<ul id="transactions"></ul>
+
+<script>
+    const apiUrl = "http://localhost:8080/api/v1/transactions";
+
+    // Функция для отправки новой транзакции
+    function addTransaction() {
+        const token = document.getElementById("token").value;
+        const amount = document.getElementById("amount").value;
+
+        if (!token || !amount) {
+            alert("Введите токен и сумму!");
+            return;
+        }
+
+        const transaction = { token, amount };
+
+        fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(transaction)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Транзакция добавлена!");
+            console.log("Добавлено:", data);
+            getAllTransactions(); // Обновляем список
+        })
+        .catch(error => console.error("Ошибка:", error));
+    }
+
+    // Функция для получения всех транзакций
+    function getAllTransactions() {
+        fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const transactionList = document.getElementById("transactions");
+            transactionList.innerHTML = "";
+            data.forEach(tx => {
+                const item = document.createElement("li");
+                item.textContent = `Токен: ${tx.token}, Сумма: ${tx.amount}`;
+                transactionList.appendChild(item);
+            });
+        })
+        .catch(error => console.error("Ошибка:", error));
+    }
+</script>
+
+</body>
+</html>
